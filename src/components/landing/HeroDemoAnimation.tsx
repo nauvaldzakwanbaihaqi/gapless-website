@@ -21,6 +21,7 @@ export default function HeroDemoAnimation() {
   const [stage, setStage] = useState<number>(0);
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({ x: 80, y: 70 });
   const [isClicking, setIsClicking] = useState<boolean>(false);
+  const [isBtnPressed, setIsBtnPressed] = useState<boolean>(false);
   const [cursorVisible, setCursorVisible] = useState<boolean>(true);
   const [isInView, setIsInView] = useState<boolean>(true);
   const [isTabActive, setIsTabActive] = useState<boolean>(true);
@@ -61,14 +62,16 @@ export default function HeroDemoAnimation() {
     };
   }, []);
 
-  // Calculate coordinates relative to containerRef
+  // Calculate coordinates relative to containerRef, directing SVG hotspot (2.5px, 1.5px) precisely to center
   const getCoordinates = useCallback((element: HTMLElement | null) => {
-    if (!element || !containerRef.current) return { x: 100, y: 100 };
+    if (!element || !containerRef.current) return { x: 90, y: 70 };
     const cRect = containerRef.current.getBoundingClientRect();
     const eRect = element.getBoundingClientRect();
+    const centerX = eRect.left - cRect.left + eRect.width / 2;
+    const centerY = eRect.top - cRect.top + eRect.height / 2;
     return {
-      x: eRect.left - cRect.left + eRect.width / 2,
-      y: eRect.top - cRect.top + eRect.height / 2,
+      x: centerX - 2.5,
+      y: centerY - 1.5,
     };
   }, []);
 
@@ -96,6 +99,7 @@ export default function HeroDemoAnimation() {
     const runTimeline = () => {
       // 0.0s: Reset to initial stage
       setStage(0);
+      setIsBtnPressed(false);
       setCursorVisible(true);
       setCursorPos({ x: 90, y: 70 });
 
@@ -133,11 +137,17 @@ export default function HeroDemoAnimation() {
         }
       }, 4200);
 
-      // 4.9s: Click "Lihat Hasil" -> Enter Analyzing Stage
+      // 4.9s: Click "Lihat Hasil" with tactile feedback
       schedule(() => {
         triggerClick();
-        setStage(4);
+        setIsBtnPressed(true);
       }, 4900);
+
+      // 5.05s: Advance to Analyzing Stage after 150ms press state
+      schedule(() => {
+        setIsBtnPressed(false);
+        setStage(4);
+      }, 5050);
 
       // 6.6s: Reveal Result Stage
       schedule(() => {
@@ -344,13 +354,15 @@ export default function HeroDemoAnimation() {
           </div>
 
           {/* Action Trigger Button */}
-          <div className="pt-1 flex justify-end">
+          <div className="pt-2 flex justify-end relative z-20">
             <button
               ref={nextBtnRef}
               type="button"
               tabIndex={-1}
-              className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm ${
-                stage >= 3
+              className={`relative z-20 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-150 flex items-center gap-1.5 shadow-sm ${
+                isBtnPressed
+                  ? "bg-[#004ECC] text-white scale-[0.95] shadow-inner ring-2 ring-brand-primary/30"
+                  : stage >= 3
                   ? "bg-brand-primary text-white scale-[1.02] shadow-brand-primary/20"
                   : "bg-gray-100 text-gray-400"
               }`}
@@ -473,7 +485,7 @@ export default function HeroDemoAnimation() {
       </div>
 
       {/* Bottom Assistant Snapshot Preview */}
-      <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between gap-4 relative z-10">
+      <div className="mt-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between gap-4 relative z-10 shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-7 h-7 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0">
             <Sparkles className="w-3.5 h-3.5" />
@@ -495,9 +507,10 @@ export default function HeroDemoAnimation() {
       {/* VIRTUAL ANIMATED CURSOR */}
       {!prefersReducedMotion && cursorVisible && (
         <div
-          className="absolute pointer-events-none z-30 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
+          className="absolute pointer-events-none z-50 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
           style={{
-            transform: `translate3d(${cursorPos.x - 3}px, ${cursorPos.y - 2}px, 0)`,
+            transform: `translate3d(${cursorPos.x}px, ${cursorPos.y}px, 0) scale(${isClicking ? 0.85 : 1})`,
+            transformOrigin: "2.5px 1.5px",
           }}
         >
           {/* SVG Brand Cursor */}
@@ -517,9 +530,15 @@ export default function HeroDemoAnimation() {
             />
           </svg>
 
-          {/* Click Ripple Effect */}
+          {/* Click Ripple Effect centered on hotspot (2.5px, 1.5px) */}
           {isClicking && (
-            <span className="absolute -top-3.5 -left-3.5 w-9 h-9 rounded-full bg-brand-primary/30 border-2 border-brand-primary animate-ping pointer-events-none" />
+            <span
+              className="absolute w-9 h-9 rounded-full bg-brand-primary/30 border-2 border-brand-primary animate-ping pointer-events-none"
+              style={{
+                left: "-15.5px",
+                top: "-16.5px",
+              }}
+            />
           )}
         </div>
       )}

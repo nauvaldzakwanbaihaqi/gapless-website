@@ -83,7 +83,7 @@ export default function HeroDemoStatic() {
       </div>
 
       {/* Bottom Assistant Snapshot Preview */}
-      <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between gap-4 relative z-10 shrink-0">
+      <div className="mt-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between gap-4 relative z-10 shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-7 h-7 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0">
             <Sparkles className="w-3.5 h-3.5" />
