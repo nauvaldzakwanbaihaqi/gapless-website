@@ -4,17 +4,20 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
   const pathname = usePathname();
+  const router = useRouter();
+
+  const isAuthPage = pathname === "/login" || pathname === "/register";
+  const isProtectedPage = 
+    pathname?.startsWith("/assessment") || 
+    pathname?.startsWith("/roadmap") || 
+    pathname?.startsWith("/gap-analysis");
+
+  const [loading, setLoading] = useState<boolean>(Boolean(isProtectedPage || isAuthPage));
 
   useEffect(() => {
     const checkAuth = () => {
-      const token = localStorage.getItem("gapless_session");
-      const isAuthPage = pathname === "/login" || pathname === "/register";
-      const isProtectedPage = pathname.startsWith("/assessment") || 
-                             pathname.startsWith("/roadmap") || 
-                             pathname.startsWith("/gap-analysis");
+      const token = typeof window !== "undefined" ? localStorage.getItem("gapless_session") : null;
 
       if (!token && isProtectedPage) {
         router.push("/login?error=unauthorized");
@@ -26,9 +29,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     };
 
     checkAuth();
-  }, [pathname, router]);
+  }, [pathname, router, isProtectedPage, isAuthPage]);
 
-  if (loading) {
+  if (loading && (isProtectedPage || isAuthPage)) {
     return (
       <div className="min-h-screen bg-brand-dark flex items-center justify-center">
         <div className="relative w-20 h-20">
