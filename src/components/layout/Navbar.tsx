@@ -86,13 +86,13 @@ export default function Navbar({ subtitle }: { subtitle?: string }) {
           <div className="w-5 h-5 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center">
             <User className="w-3 h-3" />
           </div>
-          <span>Akun Saya</span>
+          <span>{isLoggedIn ? "Akun Saya" : "Login"}</span>
         </Link>
         <button 
           onClick={handleLogout}
-          className="rounded-full px-3 py-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-all border border-gray-200 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
+          className="rounded-full px-3 py-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-300 transition-all border border-red-200 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
         >
-          <LogOut className="w-3.5 h-3.5" />
+          <LogOut className="w-3.5 h-3.5 text-red-600" />
           <span>Keluar</span>
         </button>
       </div>
@@ -132,16 +132,16 @@ export default function Navbar({ subtitle }: { subtitle?: string }) {
               className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-800"
             >
               <User className="w-4 h-4 text-brand-primary" />
-              <span>Akun Saya</span>
+              <span>{isLoggedIn ? "Akun Saya" : "Login"}</span>
             </Link>
             <button 
               onClick={() => {
                 setMobileMenuOpen(false);
                 handleLogout();
               }}
-              className="w-full justify-center rounded-full text-gray-600 hover:text-red-600 border border-gray-200 text-sm font-semibold h-10 flex items-center cursor-pointer transition-colors"
+              className="w-full justify-center rounded-full text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200 text-sm font-semibold h-10 flex items-center cursor-pointer transition-colors"
             >
-              <LogOut className="w-4 h-4 mr-2" />
+              <LogOut className="w-4 h-4 mr-2 text-red-600" />
               Keluar
             </button>
           </div>
