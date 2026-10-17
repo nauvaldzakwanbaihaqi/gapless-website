@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Brain, Briefcase, GraduationCap, Sparkles, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
-import HeroDemoStatic from "@/components/landing/HeroDemoStatic";
+import HeroDemoWrapper from "@/components/landing/HeroDemoWrapper";
 import AdaptiveCtaButton from "@/components/landing/AdaptiveCtaButton";
 
 export const metadata: Metadata = {
@@ -128,9 +128,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Hero Visual Container — Phase 1 Static Placeholder (Fixed dimensions for Phase 2 zero-CLS swap) */}
+        {/* Hero Visual Container — Phase 2 Dynamic Animation with Static SSR Fallback */}
         <div className="lg:col-span-5 w-full flex justify-center lg:justify-end">
-          <HeroDemoStatic />
+          <HeroDemoWrapper />
         </div>
       </header>
 
