@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { LogOut, User, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -46,8 +47,16 @@ export default function Navbar({ subtitle }: { subtitle?: string }) {
   return (
     <nav className="w-full max-w-7xl flex items-center justify-between px-6 md:px-12 py-5 md:py-7 mx-auto relative z-50">
       <div className="flex items-center gap-6">
-        <Link href="/" className="text-2xl font-bold tracking-tighter flex items-center gap-2 group">
-          <span className="text-3xl text-gray-900 font-black tracking-tight">Gapless</span>
+        <Link href="/" className="flex items-center gap-2.5 group transition-transform hover:scale-[1.02]">
+          <Image
+            src="/logo.png"
+            alt="Gapless Logo"
+            width={32}
+            height={32}
+            className="w-8 h-8 object-contain"
+            priority
+          />
+          <span className="text-2xl md:text-3xl text-gray-900 font-black tracking-tight">Gapless</span>
         </Link>
         
         {subtitle && (
