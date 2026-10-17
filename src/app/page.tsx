@@ -1,10 +1,11 @@
 import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Brain, Briefcase, GraduationCap, Sparkles, CheckCircle2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
 import HeroDemoWrapper from "@/components/landing/HeroDemoWrapper";
+import BentoEcosystemTour from "@/components/landing/BentoEcosystemTour";
 import AdaptiveCtaButton from "@/components/landing/AdaptiveCtaButton";
 
 export const metadata: Metadata = {
@@ -148,164 +149,8 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* 3-Card Bento Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
-          
-          {/* Card 1: Analisis Kepribadian (Large Left Card) */}
-          <div className="md:col-span-2 lg:col-span-8 lg:row-span-2 p-7 md:p-9 bg-gray-50/80 border border-gray-200/80 rounded-[32px] md:rounded-[40px] flex flex-col justify-between group hover:border-brand-primary/40 transition-all duration-300 relative overflow-hidden">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-13 h-13 rounded-2xl bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/20 shadow-xs">
-                  <Brain className="w-6 h-6 text-brand-primary" />
-                </div>
-                <div>
-                  <h3 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900">
-                    Analisis Kepribadian
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1 max-w-md">
-                    Algoritma AI kami membedah matriks perilaku kamu untuk menemukan kekuatan alami yang seringkali tidak kamu sadari.
-                  </p>
-                </div>
-              </div>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-white border border-gray-200 text-gray-400 shrink-0">
-                Contoh tampilan
-              </span>
-            </div>
-
-            {/* Middle Visual Area: 4 Archetype Cards Showcase */}
-            <div className="my-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { name: "The Thinker", role: "Analytical & Logic", tag: "85%" },
-                { name: "The Creator", role: "Visual & Creative", tag: "70%" },
-                { name: "The Connector", role: "People & Growth", tag: "90%" },
-                { name: "The Builder", role: "Execution & Systems", tag: "65%" },
-              ].map((arch) => (
-                <div
-                  key={arch.name}
-                  className="p-3.5 rounded-2xl bg-white border border-gray-100 shadow-xs space-y-1 hover:border-brand-primary/30 transition-colors"
-                >
-                  <div className="text-[10px] uppercase font-black tracking-widest text-brand-primary">
-                    Archetype
-                  </div>
-                  <div className="text-xs sm:text-sm font-bold text-gray-900">
-                    {arch.name}
-                  </div>
-                  <div className="text-[10px] text-gray-400 truncate">
-                    {arch.role}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Bottom Trait Bars with 4 Real Archetypes */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6 p-5 md:p-6 bg-white rounded-[24px] border border-gray-100 shadow-xs">
-              {[
-                { label: "The Thinker", val: 85 },
-                { label: "The Creator", val: 70 },
-                { label: "The Connector", val: 90 },
-                { label: "The Builder", val: 65 },
-              ].map((item) => (
-                <div key={item.label} className="space-y-2.5">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 truncate">
-                      {item.label}
-                    </span>
-                    <span className="text-xs font-bold text-gray-900 tabular-nums">
-                      {item.val}%
-                    </span>
-                  </div>
-                  <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-brand-primary rounded-full transition-all duration-700"
-                      style={{ width: `${item.val}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Card 2: Rekomendasi Karir (Top Right Card) */}
-          <div className="col-span-1 lg:col-span-4 p-7 md:p-8 bg-gray-50/80 border border-gray-200/80 rounded-[32px] md:rounded-[40px] flex flex-col justify-between group hover:border-brand-primary/40 transition-all duration-300 min-h-[280px]">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/20">
-                  <Briefcase className="w-6 h-6 text-brand-primary" />
-                </div>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-white border border-gray-200 text-gray-400">
-                  Contoh tampilan
-                </span>
-              </div>
-              <h3 className="text-xl md:text-2xl font-black tracking-tight text-gray-900">
-                Rekomendasi Karir
-              </h3>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                Pilihan karir yang telah dikurasi khusus berdasarkan profil AI unikmu.
-              </p>
-            </div>
-
-            {/* Real Catalog Role Chips */}
-            <div className="flex flex-wrap gap-2 mt-6">
-              {[
-                "Software Engineer",
-                "Graphic Designer",
-                "Digital Marketing",
-                "Data Analyst",
-              ].map((role) => (
-                <div
-                  key={role}
-                  className="px-3 py-1.5 bg-white border border-gray-200/80 rounded-xl text-xs font-bold text-gray-800 shadow-2xs hover:border-brand-primary transition-colors"
-                >
-                  {role}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Card 3: Roadmap Belajar (Bottom Right Card) */}
-          <div className="col-span-1 lg:col-span-4 p-7 md:p-8 bg-gray-50/80 border border-gray-200/80 rounded-[32px] md:rounded-[40px] flex flex-col justify-between group hover:border-brand-primary/40 transition-all duration-300 min-h-[280px]">
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-800 border border-gray-200">
-                <GraduationCap className="w-6 h-6 text-gray-900" />
-              </div>
-              <h3 className="text-xl md:text-2xl font-black tracking-tight text-gray-900">
-                Roadmap Belajar
-              </h3>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                Kurikulum terstruktur untuk menjembatani kesenjangan skill kamu.
-              </p>
-            </div>
-
-            {/* Stepper 01 - 02 - 03 */}
-            <div className="space-y-3 mt-6">
-              {[
-                { step: "01", title: "Fondasi Keahlian", active: true },
-                { step: "02", title: "Pemetaan Skill", active: false },
-                { step: "03", title: "Eksplorasi Minat", active: false },
-              ].map((s, idx) => (
-                <div key={s.step} className="flex items-center gap-3">
-                  <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
-                      s.active
-                        ? "bg-brand-primary text-white shadow-xs"
-                        : "bg-white border border-gray-200 text-gray-400"
-                    }`}
-                  >
-                    {s.step}
-                  </div>
-                  <span
-                    className={`text-xs font-semibold ${
-                      s.active ? "text-gray-900" : "text-gray-500"
-                    }`}
-                  >
-                    {s.title}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </div>
+        {/* Interactive Bento Ecosystem Grid with Tour Animation */}
+        <BentoEcosystemTour />
       </section>
 
       {/* Closing CTA — Compact Strip (No extra long scroll) */}
