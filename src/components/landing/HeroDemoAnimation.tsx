@@ -22,6 +22,7 @@ export default function HeroDemoAnimation() {
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({ x: 80, y: 70 });
   const [isClicking, setIsClicking] = useState<boolean>(false);
   const [isBtnPressed, setIsBtnPressed] = useState<boolean>(false);
+  const [isBtnHovered, setIsBtnHovered] = useState<boolean>(false);
   const [cursorVisible, setCursorVisible] = useState<boolean>(true);
   const [isInView, setIsInView] = useState<boolean>(true);
   const [isTabActive, setIsTabActive] = useState<boolean>(true);
@@ -62,7 +63,7 @@ export default function HeroDemoAnimation() {
     };
   }, []);
 
-  // Calculate coordinates relative to containerRef, directing SVG hotspot (2.5px, 1.5px) precisely to center
+  // Calculate coordinates relative to containerRef, directing enlarged SVG hotspot (3px, 2px) precisely to center
   const getCoordinates = useCallback((element: HTMLElement | null, offset?: { x?: number; y?: number }) => {
     if (!element || !containerRef.current) return { x: 90, y: 70 };
     const cRect = containerRef.current.getBoundingClientRect();
@@ -70,8 +71,8 @@ export default function HeroDemoAnimation() {
     const centerX = eRect.left - cRect.left + eRect.width / 2 + (offset?.x ?? 0);
     const centerY = eRect.top - cRect.top + eRect.height / 2 + (offset?.y ?? 0);
     return {
-      x: centerX - 2.5,
-      y: centerY - 1.5,
+      x: centerX - 3,
+      y: centerY - 2,
     };
   }, []);
 
@@ -100,6 +101,7 @@ export default function HeroDemoAnimation() {
       // 0.0s: Reset to initial stage
       setStage(0);
       setIsBtnPressed(false);
+      setIsBtnHovered(false);
       setCursorVisible(true);
       setCursorPos({ x: 90, y: 70 });
 
@@ -130,46 +132,56 @@ export default function HeroDemoAnimation() {
         setStage(3);
       }, 3500);
 
-      // 4.2s: Move cursor to "Lihat Hasil"
+      // 4.1s: Move cursor deliberately towards "Lihat Hasil Asesmen" button
       schedule(() => {
         if (nextBtnRef.current) {
           setCursorPos(getCoordinates(nextBtnRef.current, { y: -3 }));
         }
-      }, 4200);
+      }, 4100);
 
-      // 4.9s: Click "Lihat Hasil" with tactile feedback
+      // 4.8s: Cursor arrives at button -> triggers active hover illumination!
+      schedule(() => {
+        setIsBtnHovered(true);
+      }, 4800);
+
+      // 5.5s: Click "Lihat Hasil" with tactile feedback (dwell time gives clear view)
       schedule(() => {
         triggerClick();
         setIsBtnPressed(true);
-      }, 4900);
+      }, 5500);
 
-      // 5.05s: Advance to Analyzing Stage after 150ms press state
+      // 5.85s: Release button press
       schedule(() => {
         setIsBtnPressed(false);
-        setStage(4);
-      }, 5050);
+        setIsBtnHovered(false);
+      }, 5850);
 
-      // 6.6s: Reveal Result Stage
+      // 6.0s: Advance to Analyzing Stage
+      schedule(() => {
+        setStage(4);
+      }, 6000);
+
+      // 7.6s: Reveal Result Stage
       schedule(() => {
         setStage(5);
-      }, 6600);
+      }, 7600);
 
-      // 7.8s: Move cursor to Software Engineer Chip
+      // 8.8s: Move cursor to Software Engineer Chip
       schedule(() => {
         if (chipRef.current) {
           setCursorPos(getCoordinates(chipRef.current));
         }
-      }, 7800);
+      }, 8800);
 
-      // 10.6s: Fade out / reset
+      // 11.6s: Fade out / reset
       schedule(() => {
         setStage(6);
-      }, 10600);
+      }, 11600);
 
-      // 11.4s: Restart timeline loop
+      // 12.4s: Restart timeline loop
       schedule(() => {
         runTimeline();
-      }, 11400);
+      }, 12400);
     };
 
     runTimeline();
@@ -359,9 +371,11 @@ export default function HeroDemoAnimation() {
               ref={nextBtnRef}
               type="button"
               tabIndex={-1}
-              className={`relative z-20 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-150 flex items-center gap-1.5 shadow-sm ${
+              className={`relative z-20 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-200 flex items-center gap-1.5 shadow-sm ${
                 isBtnPressed
-                  ? "bg-[#004ECC] text-white scale-[0.95] shadow-inner ring-2 ring-brand-primary/30"
+                  ? "bg-[#004ECC] text-white scale-[0.95] shadow-inner ring-4 ring-brand-primary/40"
+                  : isBtnHovered
+                  ? "bg-brand-primary text-white scale-[1.06] shadow-lg shadow-brand-primary/30 ring-4 ring-brand-primary/25"
                   : stage >= 3
                   ? "bg-brand-primary text-white scale-[1.02] shadow-brand-primary/20"
                   : "bg-gray-100 text-gray-400"
@@ -510,36 +524,38 @@ export default function HeroDemoAnimation() {
           className="absolute pointer-events-none z-50 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
           style={{
             transform: `translate3d(${cursorPos.x}px, ${cursorPos.y}px, 0) scale(${isClicking ? 0.85 : 1})`,
-            transformOrigin: "2.5px 1.5px",
+            transformOrigin: "3px 2px",
           }}
         >
-          {/* SVG Brand Cursor */}
-          <svg
-            width="22"
-            height="26"
-            viewBox="0 0 24 28"
-            fill="none"
-            className="drop-shadow-md"
-          >
-            <path
-              d="M2.5 1.5L21.5 13.5L12 16L8 25.5L2.5 1.5Z"
-              fill="#0066FF"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-          </svg>
+          {/* SVG Brand Cursor - Enlarged 28x34 with high-detail brand shadow */}
+          <div className="relative">
+            <svg
+              width="28"
+              height="34"
+              viewBox="0 0 24 28"
+              fill="none"
+              className="drop-shadow-lg filter drop-shadow-[0_4px_10px_rgba(0,102,255,0.35)]"
+            >
+              <path
+                d="M2.5 1.5L21.5 13.5L12 16L8 25.5L2.5 1.5Z"
+                fill="#0066FF"
+                stroke="white"
+                strokeWidth="2.2"
+                strokeLinejoin="round"
+              />
+            </svg>
 
-          {/* Click Ripple Effect centered on hotspot (2.5px, 1.5px) */}
-          {isClicking && (
-            <span
-              className="absolute w-9 h-9 rounded-full bg-brand-primary/30 border-2 border-brand-primary animate-ping pointer-events-none"
-              style={{
-                left: "-15.5px",
-                top: "-16.5px",
-              }}
-            />
-          )}
+            {/* Click Ripple Effect centered on hotspot (3px, 2px) */}
+            {isClicking && (
+              <span
+                className="absolute w-11 h-11 rounded-full bg-brand-primary/35 border-2 border-brand-primary animate-ping pointer-events-none"
+                style={{
+                  left: "-18px",
+                  top: "-19px",
+                }}
+              />
+            )}
+          </div>
         </div>
       )}
     </div>
