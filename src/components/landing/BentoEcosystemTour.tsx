@@ -1,30 +1,99 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Brain, Briefcase, GraduationCap, CheckCircle2, Sparkles, ChevronRight } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Brain,
+  Briefcase,
+  GraduationCap,
+  Sparkles,
+  CheckCircle2,
+  Activity,
+} from "lucide-react";
+
+interface ArchetypePreset {
+  id: string;
+  name: string;
+  role: string;
+  score: number;
+  tagline: string;
+  traits: string[];
+  career: string;
+  matchScore: number;
+  activeStep: number;
+  metrics: { logic: number; creativity: number; growth: number; execution: number };
+}
+
+const ARCHETYPE_PRESETS: ArchetypePreset[] = [
+  {
+    id: "builder",
+    name: "The Builder",
+    role: "Execution & Systems",
+    score: 95,
+    tagline: "Kekuatan alami dalam rekayasa sistem, pemecahan masalah logis, dan eksekusi terstruktur.",
+    traits: ["Arsitektur Sistem", "Logika Pemrograman", "Eksekusi Presisi"],
+    career: "Software Engineer",
+    matchScore: 95,
+    activeStep: 2,
+    metrics: { logic: 95, creativity: 65, growth: 70, execution: 98 },
+  },
+  {
+    id: "thinker",
+    name: "The Thinker",
+    role: "Analytical & Logic",
+    score: 90,
+    tagline: "Kekuatan alami dalam membedah data kuantitatif, riset mendalam, dan pola komputasi.",
+    traits: ["Investigasi Data", "Penalaran Statistik", "Analisis Pola"],
+    career: "Data Analyst",
+    matchScore: 92,
+    activeStep: 1,
+    metrics: { logic: 92, creativity: 60, growth: 80, execution: 85 },
+  },
+  {
+    id: "creator",
+    name: "The Creator",
+    role: "Visual & Creative",
+    score: 85,
+    tagline: "Kekuatan alami dalam merancang estetika visual, pengalaman interaksi, dan prototipe kreatif.",
+    traits: ["Desain Antarmuka", "Eksplorasi Visual", "Empati Pengguna"],
+    career: "Graphic Designer",
+    matchScore: 88,
+    activeStep: 3,
+    metrics: { logic: 70, creativity: 95, growth: 75, execution: 82 },
+  },
+  {
+    id: "connector",
+    name: "The Connector",
+    role: "People & Growth",
+    score: 92,
+    tagline: "Kekuatan alami dalam komunikasi persuasif, manajemen relasi, dan strategi pertumbuhan.",
+    traits: ["Pertumbuhan Pasar", "Komunikasi Strategis", "Kolaborasi Tim"],
+    career: "Digital Marketing",
+    matchScore: 94,
+    activeStep: 2,
+    metrics: { logic: 78, creativity: 85, growth: 95, execution: 88 },
+  },
+];
+
+const CAREER_ROLES = [
+  "Software Engineer",
+  "Graphic Designer",
+  "Digital Marketing",
+  "Data Analyst",
+];
+
+const ROADMAP_STEPS = [
+  { step: "01", title: "Fondasi Keahlian", sub: "Konsep dasar industri & algoritma" },
+  { step: "02", title: "Pemetaan Skill", sub: "Framework modern & hands-on project" },
+  { step: "03", title: "Eksplorasi Minat", sub: "Portofolio siap kerja & verifikasi" },
+];
 
 export default function BentoEcosystemTour() {
-  const bentoContainerRef = useRef<HTMLDivElement>(null);
-
-  // Element Refs for dynamic cursor target calculation
-  const archBuilderRef = useRef<HTMLDivElement>(null);
-  const chipSoftwareEngRef = useRef<HTMLDivElement>(null);
-  const step02Ref = useRef<HTMLDivElement>(null);
-
-  // States
-  const [tourStep, setTourStep] = useState<number>(0);
-  const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({ x: 120, y: 100 });
-  const [isClicking, setIsClicking] = useState<boolean>(false);
-  const [isUserHovered, setIsUserHovered] = useState<boolean>(false);
-  const [isInView, setIsInView] = useState<boolean>(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [activeIdx, setActiveIdx] = useState<number>(0);
+  const [isInView, setIsInView] = useState<boolean>(true);
   const [isTabActive, setIsTabActive] = useState<boolean>(true);
+  const [isUserInteracting, setIsUserInteracting] = useState<boolean>(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(false);
-
-  // Dynamic visual states driven by tour
-  const [selectedArchetype, setSelectedArchetype] = useState<string>("The Builder");
-  const [hoveredChip, setHoveredChip] = useState<string | null>(null);
-  const [activeStep, setActiveStep] = useState<number>(1);
-  const [barsAnimated, setBarsAnimated] = useState<boolean>(true);
 
   // Check prefers-reduced-motion
   useEffect(() => {
@@ -37,7 +106,7 @@ export default function BentoEcosystemTour() {
     }
   }, []);
 
-  // Viewport Observer (tour only runs when in view)
+  // Viewport & Visibility Observers with large rootMargin so it activates proactively
   useEffect(() => {
     const handleVisibility = () => {
       setIsTabActive(document.visibilityState === "visible");
@@ -48,11 +117,11 @@ export default function BentoEcosystemTour() {
       ([entry]) => {
         setIsInView(entry.isIntersecting);
       },
-      { threshold: 0.2 }
+      { threshold: 0, rootMargin: "250px 0px 250px 0px" }
     );
 
-    if (bentoContainerRef.current) {
-      observer.observe(bentoContainerRef.current);
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
     }
 
     return () => {
@@ -61,413 +130,338 @@ export default function BentoEcosystemTour() {
     };
   }, []);
 
-  // Coordinate calculator relative to bentoContainerRef
-  const getCoordinates = useCallback((element: HTMLElement | null) => {
-    if (!element || !bentoContainerRef.current) return { x: 120, y: 100 };
-    const cRect = bentoContainerRef.current.getBoundingClientRect();
-    const eRect = element.getBoundingClientRect();
-    return {
-      x: eRect.left - cRect.left + eRect.width / 2,
-      y: eRect.top - cRect.top + eRect.height / 2,
-    };
-  }, []);
-
-  // Main Ecosystem Tour Timeline Loop (~14 seconds)
+  // Continuous, lightweight rotation every 3.2 seconds
   useEffect(() => {
-    if (prefersReducedMotion || !isInView || !isTabActive || isUserHovered) return;
+    if (prefersReducedMotion || !isInView || !isTabActive || isUserInteracting) return;
 
-    let active = true;
-    let timerIds: NodeJS.Timeout[] = [];
+    const timer = setInterval(() => {
+      setActiveIdx((prev) => (prev + 1) % ARCHETYPE_PRESETS.length);
+    }, 3200);
 
-    const schedule = (fn: () => void, delayMs: number) => {
-      const id = setTimeout(() => {
-        if (active) fn();
-      }, delayMs);
-      timerIds.push(id);
-    };
+    return () => clearInterval(timer);
+  }, [isInView, isTabActive, isUserInteracting, prefersReducedMotion]);
 
-    const triggerClick = () => {
-      setIsClicking(true);
-      setTimeout(() => {
-        if (active) setIsClicking(false);
-      }, 350);
-    };
+  // Click handler: switches tab immediately and pauses auto-cycle for 6 seconds
+  const handleSelectArchetype = (idx: number) => {
+    setActiveIdx(idx);
+    setIsUserInteracting(true);
+    const timeout = setTimeout(() => {
+      setIsUserInteracting(false);
+    }, 6000);
+    return () => clearTimeout(timeout);
+  };
 
-    const runTour = () => {
-      // 0.0s: Start tour at Archetype card
-      setTourStep(0);
-      setSelectedArchetype("The Builder");
-      setHoveredChip(null);
-      setActiveStep(1);
-      setBarsAnimated(false);
-
-      if (archBuilderRef.current) {
-        setCursorPos(getCoordinates(archBuilderRef.current));
-      }
-
-      // 1.2s: Cursor clicks "The Builder" card
-      schedule(() => {
-        triggerClick();
-        setSelectedArchetype("The Builder");
-        setBarsAnimated(true);
-        setTourStep(1);
-      }, 1200);
-
-      // 3.8s: Cursor glides towards "Rekomendasi Karir" (Software Engineer chip)
-      schedule(() => {
-        setTourStep(2);
-        if (chipSoftwareEngRef.current) {
-          setCursorPos(getCoordinates(chipSoftwareEngRef.current));
-        }
-      }, 3800);
-
-      // 5.2s: Cursor hovers "Software Engineer" chip -> shows tooltip
-      schedule(() => {
-        setHoveredChip("Software Engineer");
-        setTourStep(3);
-      }, 5200);
-
-      // 8.0s: Cursor glides towards "Roadmap Belajar" (Step 02)
-      schedule(() => {
-        setHoveredChip(null);
-        setTourStep(4);
-        if (step02Ref.current) {
-          setCursorPos(getCoordinates(step02Ref.current));
-        }
-      }, 8000);
-
-      // 9.5s: Cursor clicks Step 02 in Roadmap Belajar
-      schedule(() => {
-        triggerClick();
-        setActiveStep(2);
-        setTourStep(5);
-      }, 9500);
-
-      // 12.0s: Tour hold state
-      schedule(() => {
-        setTourStep(6);
-      }, 12000);
-
-      // 13.5s: Reset and loop
-      schedule(() => {
-        runTour();
-      }, 13500);
-    };
-
-    runTour();
-
-    return () => {
-      active = false;
-      timerIds.forEach(clearTimeout);
-    };
-  }, [isInView, isTabActive, isUserHovered, prefersReducedMotion, getCoordinates]);
-
-  // Recalculate target position on resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (tourStep === 1 && archBuilderRef.current) {
-        setCursorPos(getCoordinates(archBuilderRef.current));
-      } else if ((tourStep === 2 || tourStep === 3) && chipSoftwareEngRef.current) {
-        setCursorPos(getCoordinates(chipSoftwareEngRef.current));
-      } else if ((tourStep === 4 || tourStep === 5) && step02Ref.current) {
-        setCursorPos(getCoordinates(step02Ref.current));
-      }
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [tourStep, getCoordinates]);
-
-  const archetypes = [
-    { name: "The Thinker", role: "Analytical & Logic", val: 85 },
-    { name: "The Creator", role: "Visual & Creative", val: 70 },
-    { name: "The Connector", role: "People & Growth", val: 90 },
-    { name: "The Builder", role: "Execution & Systems", val: 95 },
-  ];
-
-  const careerRoles = [
-    "Software Engineer",
-    "Graphic Designer",
-    "Digital Marketing",
-    "Data Analyst",
-  ];
-
-  const roadmapSteps = [
-    { step: "01", title: "Fondasi Keahlian", sub: "Konsep dasar industri & algoritma" },
-    { step: "02", title: "Pemetaan Skill", sub: "Framework modern & hands-on project" },
-    { step: "03", title: "Eksplorasi Minat", sub: "Portofolio siap kerja & verifikasi" },
-  ];
+  const current = ARCHETYPE_PRESETS[activeIdx];
 
   return (
     <div
-      ref={bentoContainerRef}
-      onMouseEnter={() => setIsUserHovered(true)}
-      onMouseLeave={() => setIsUserHovered(false)}
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 relative"
+      ref={containerRef}
+      className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4 relative select-none w-full"
     >
       {/* =========================================================================
-          CARD 1: Analisis Kepribadian (Large Left Bento Card)
+          CARD 1: Analisis Kepribadian (Left Bento Card - Compact, Rich & Connected)
       ========================================================================= */}
-      <div className="md:col-span-2 lg:col-span-8 lg:row-span-2 p-7 md:p-9 bg-gray-50/80 border border-gray-200/80 rounded-[32px] md:rounded-[40px] flex flex-col justify-between group hover:border-brand-primary/40 transition-all duration-300 relative overflow-hidden">
-        {/* Subtle Decorative Glow */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 blur-[90px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+      <div className="lg:col-span-8 p-4 sm:p-5 bg-gray-50/90 border border-gray-200/90 rounded-2xl sm:rounded-3xl flex flex-col justify-between hover:border-brand-primary/40 transition-all duration-300 relative overflow-hidden group shadow-xs">
+        {/* Subtle Ambient Glow */}
+        <div className="absolute top-0 right-0 w-48 h-48 bg-brand-primary/5 blur-[60px] pointer-events-none" />
 
-        <div className="flex items-start justify-between relative z-10">
-          <div className="flex items-center gap-4">
-            <div className="w-13 h-13 rounded-2xl bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/20 shadow-xs">
-              <Brain className="w-6 h-6 text-brand-primary" />
+        {/* Card Header with Live Simulation Indicator */}
+        <div className="flex items-center justify-between border-b border-gray-100 pb-2.5 relative z-10 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/20 shadow-3xs">
+              <Brain className="w-4 h-4 text-brand-primary" />
             </div>
             <div>
-              <h3 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900">
-                Analisis Kepribadian
-              </h3>
-              <p className="text-sm text-gray-500 mt-1 max-w-md">
-                Algoritma AI kami membedah matriks perilaku kamu untuk menemukan kekuatan alami yang seringkali tidak kamu sadari.
+              <div className="flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-black tracking-tight text-gray-900 leading-tight">
+                  Analisis Kepribadian
+                </h3>
+              </div>
+              <p className="text-[11px] text-gray-500 leading-tight hidden sm:block">
+                Algoritma AI memetakan respon perilaku ke 4 profil karir nyata.
               </p>
             </div>
           </div>
-          <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-white border border-gray-200 text-gray-400 shrink-0">
-            Contoh tampilan
-          </span>
+
+          {/* Live Animation Status Pill */}
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-gray-200 shadow-3xs text-[10px] font-bold text-gray-600">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-primary animate-ping" />
+            <span className="text-brand-primary font-black">Live Tour</span>
+          </div>
         </div>
 
-        {/* Middle Visual Area: 4 Interactive Archetype Cards */}
-        <div className="my-8 grid grid-cols-2 sm:grid-cols-4 gap-3 relative z-10">
-          {archetypes.map((arch) => {
-            const isSelected = selectedArchetype === arch.name;
-            const isTarget = arch.name === "The Builder";
-            return (
-              <div
-                key={arch.name}
-                ref={isTarget ? archBuilderRef : undefined}
-                role="button"
-                tabIndex={0}
-                onClick={() => {
-                  setSelectedArchetype(arch.name);
-                  setBarsAnimated(true);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setSelectedArchetype(arch.name);
-                    setBarsAnimated(true);
-                  }
-                }}
-                className={`p-4 rounded-2xl border transition-all duration-400 select-none cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${
-                  isSelected
-                    ? "bg-white border-2 border-brand-primary shadow-md shadow-brand-primary/10 ring-2 ring-brand-primary/10 scale-[1.02]"
-                    : "bg-white/80 border-gray-200/80 hover:border-gray-300"
-                }`}
+        {/* Middle Area: ACTIVE PERSONA SHOWCASE (Rich, Compact & Zero Void) */}
+        <div className="my-2.5 p-3 sm:p-3.5 rounded-xl bg-white border border-gray-200/90 shadow-2xs relative z-10 space-y-2">
+          {/* Active Preset Header */}
+          <div className="flex flex-wrap items-center justify-between gap-1.5 border-b border-gray-100 pb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-brand-primary">
+                Profil:
+              </span>
+              <span className="text-sm font-black text-gray-900 transition-colors duration-300">
+                {current.name}
+              </span>
+              <span className="text-[10px] text-gray-400 font-semibold">
+                ({current.role})
+              </span>
+            </div>
+            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary text-[10px] font-black">
+              <Sparkles className="w-3 h-3 shrink-0" />
+              <span>Dominan {current.score}%</span>
+            </div>
+          </div>
+
+          {/* Dynamic Tagline */}
+          <p className="text-xs text-gray-600 leading-snug font-medium line-clamp-2">
+            {current.tagline}
+          </p>
+
+          {/* Dynamic Strength Pills */}
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
+              Kekuatan Alami:
+            </span>
+            {current.traits.map((trait) => (
+              <span
+                key={trait}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-50 border border-gray-200/80 text-gray-800 text-[10px] font-bold shadow-3xs"
               >
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-[9px] uppercase font-black tracking-widest text-brand-primary">
-                    Archetype
-                  </span>
-                  {isSelected && (
-                    <span className="w-2 h-2 rounded-full bg-brand-primary animate-pulse" />
-                  )}
-                </div>
-                <div className="text-xs sm:text-sm font-bold text-gray-900 truncate">
-                  {arch.name}
-                </div>
-                <div className="text-[10px] text-gray-400 truncate mt-0.5">
-                  {arch.role}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                <CheckCircle2 className="w-2.5 h-2.5 text-brand-primary shrink-0" />
+                {trait}
+              </span>
+            ))}
+          </div>
 
-        {/* Bottom Trait Bars with 4 Real Archetypes */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6 p-5 md:p-6 bg-white rounded-[24px] border border-gray-100 shadow-xs relative z-10">
-          {archetypes.map((item) => (
-            <div key={item.name} className="space-y-2">
-              <div className="flex justify-between items-baseline">
-                <span className="text-[10px] font-black uppercase tracking-wider text-gray-400 truncate">
-                  {item.name}
-                </span>
-                <span className="text-xs font-bold text-gray-900 tabular-nums">
-                  {item.val}%
+          {/* 4 Behavioral Spectrum Meters */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1.5 border-t border-gray-100">
+            <div className="space-y-0.5">
+              <div className="flex justify-between text-[9px] font-bold text-gray-500">
+                <span>Logika</span>
+                <span className="text-brand-primary font-black tabular-nums">
+                  {current.metrics.logic}%
                 </span>
               </div>
               <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-brand-primary rounded-full transition-all duration-800 ease-out"
-                  style={{
-                    width: barsAnimated ? `${item.val}%` : "0%",
-                  }}
+                  className="h-full bg-brand-primary rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${current.metrics.logic}%` }}
                 />
               </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* =========================================================================
-          CARD 2: Rekomendasi Karir (Top Right Card)
-      ========================================================================= */}
-      <div className="col-span-1 lg:col-span-4 p-7 md:p-8 bg-gray-50/80 border border-gray-200/80 rounded-[32px] md:rounded-[40px] flex flex-col justify-between group hover:border-brand-primary/40 transition-all duration-300 min-h-[290px] relative">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="w-12 h-12 rounded-2xl bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/20">
-              <Briefcase className="w-6 h-6 text-brand-primary" />
+            <div className="space-y-0.5">
+              <div className="flex justify-between text-[9px] font-bold text-gray-500">
+                <span>Kreativitas</span>
+                <span className="text-brand-primary font-black tabular-nums">
+                  {current.metrics.creativity}%
+                </span>
+              </div>
+              <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-brand-primary rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${current.metrics.creativity}%` }}
+                />
+              </div>
             </div>
-            <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-white border border-gray-200 text-gray-400">
-              Contoh tampilan
-            </span>
+
+            <div className="space-y-0.5">
+              <div className="flex justify-between text-[9px] font-bold text-gray-500">
+                <span>Kolaborasi</span>
+                <span className="text-brand-primary font-black tabular-nums">
+                  {current.metrics.growth}%
+                </span>
+              </div>
+              <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-brand-primary rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${current.metrics.growth}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-0.5">
+              <div className="flex justify-between text-[9px] font-bold text-gray-500">
+                <span>Eksekusi</span>
+                <span className="text-brand-primary font-black tabular-nums">
+                  {current.metrics.execution}%
+                </span>
+              </div>
+              <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-brand-primary rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${current.metrics.execution}%` }}
+                />
+              </div>
+            </div>
           </div>
-          <h3 className="text-xl md:text-2xl font-black tracking-tight text-gray-900">
-            Rekomendasi Karir
-          </h3>
-          <p className="text-sm text-gray-500 leading-relaxed">
-            Pilihan karir yang telah dikurasi khusus berdasarkan profil AI unikmu.
-          </p>
         </div>
 
-        {/* Real Catalog Role Chips */}
-        <div className="flex flex-wrap gap-2 mt-6 relative">
-          {careerRoles.map((role) => {
-            const isHovered = hoveredChip === role;
-            const isTarget = role === "Software Engineer";
-
+        {/* Bottom Area: 4 Interactive Archetype Selector Tabs with Auto Progress */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 relative z-10 shrink-0">
+          {ARCHETYPE_PRESETS.map((arch, idx) => {
+            const isSelected = activeIdx === idx;
             return (
-              <div
-                key={role}
-                ref={isTarget ? chipSoftwareEngRef : undefined}
-                role="button"
-                tabIndex={0}
-                onMouseEnter={() => setHoveredChip(role)}
-                onMouseLeave={() => setHoveredChip(null)}
-                onClick={() => setHoveredChip(hoveredChip === role ? null : role)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setHoveredChip(hoveredChip === role ? null : role);
-                  }
-                }}
-                className={`relative px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 shadow-2xs select-none cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${
-                  isHovered
-                    ? "bg-brand-primary text-white scale-105 shadow-md shadow-brand-primary/20"
-                    : "bg-white border border-gray-200/80 text-gray-800 hover:border-brand-primary"
+              <button
+                key={arch.id}
+                type="button"
+                onClick={() => handleSelectArchetype(idx)}
+                className={`p-2 rounded-lg border text-left transition-all duration-200 select-none cursor-pointer relative overflow-hidden ${
+                  isSelected
+                    ? "bg-white border-brand-primary shadow-xs ring-1 ring-brand-primary/20 scale-[1.01]"
+                    : "bg-white/60 border-gray-200 hover:bg-white hover:border-gray-300 opacity-75"
                 }`}
               >
-                {role}
-
-                {/* Floating Interactive Tooltip */}
-                {isHovered && (
-                  <div className="absolute -top-11 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-xl bg-gray-900 text-white text-[10px] font-bold tracking-wide whitespace-nowrap shadow-xl z-20 animate-in fade-in zoom-in-95 duration-200">
-                    Kecocokan 95% • Profil {selectedArchetype}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+                {/* Auto-cycling visual progress bar for active tab */}
+                {isSelected && !isUserInteracting && (
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand-primary/20 overflow-hidden">
+                    <div
+                      key={`progress-${activeIdx}`}
+                      className="h-full bg-brand-primary animate-[progressFill_3.2s_linear]"
+                      style={{
+                        animation: "progressFill 3.2s linear forwards",
+                      }}
+                    />
                   </div>
                 )}
-              </div>
+
+                <div className="flex items-center justify-between mb-0.5">
+                  <span className="text-[8px] font-black uppercase tracking-wider text-brand-primary">
+                    Archetype
+                  </span>
+                  {isSelected && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+                  )}
+                </div>
+                <div className="text-xs font-black text-gray-900 truncate">
+                  {arch.name}
+                </div>
+                <div className="text-[9px] text-gray-400 truncate font-semibold">
+                  {arch.score}% Match
+                </div>
+              </button>
             );
           })}
         </div>
       </div>
 
       {/* =========================================================================
-          CARD 3: Roadmap Belajar (Bottom Right Card)
+          RIGHT COLUMN: Cards 2 & 3 (Stacked & Compact)
       ========================================================================= */}
-      <div className="col-span-1 lg:col-span-4 p-7 md:p-8 bg-gray-50/80 border border-gray-200/80 rounded-[32px] md:rounded-[40px] flex flex-col justify-between group hover:border-brand-primary/40 transition-all duration-300 min-h-[290px]">
-        <div className="space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-800 border border-gray-200">
-            <GraduationCap className="w-6 h-6 text-gray-900" />
+      <div className="lg:col-span-4 flex flex-col gap-3.5 sm:gap-4">
+        {/* CARD 2: Rekomendasi Karir */}
+        <div className="p-4 sm:p-4.5 bg-gray-50/90 border border-gray-200/90 rounded-2xl sm:rounded-3xl flex flex-col justify-between hover:border-brand-primary/40 transition-all duration-300 relative group flex-1 shadow-xs">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="w-8 h-8 rounded-lg bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/20">
+                <Briefcase className="w-4 h-4 text-brand-primary" />
+              </div>
+              <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-white border border-gray-200 text-gray-400">
+                Contoh tampilan
+              </span>
+            </div>
+            <h3 className="text-base font-black tracking-tight text-gray-900 leading-tight">
+              Rekomendasi Karir
+            </h3>
+            <p className="text-[11px] text-gray-500 leading-tight mt-0.5">
+              Dikurasi langsung dari archetype dominanmu.
+            </p>
           </div>
-          <h3 className="text-xl md:text-2xl font-black tracking-tight text-gray-900">
-            Roadmap Belajar
-          </h3>
-          <p className="text-sm text-gray-500 leading-relaxed">
-            Kurikulum terstruktur untuk menjembatani kesenjangan skill kamu.
-          </p>
-        </div>
 
-        {/* Stepper 01 - 02 - 03 with Step 02 Click Target */}
-        <div className="space-y-2.5 mt-6">
-          {roadmapSteps.map((s, idx) => {
-            const stepNum = idx + 1;
-            const isActive = activeStep >= stepNum;
-            const isTarget = stepNum === 2;
+          {/* Interactive Career Role Chips with Active Glow */}
+          <div className="flex flex-wrap gap-1.5 pt-2.5">
+            {CAREER_ROLES.map((role) => {
+              const isMatch = role === current.career;
 
-            return (
-              <div
-                key={s.step}
-                ref={isTarget ? step02Ref : undefined}
-                role="button"
-                tabIndex={0}
-                onClick={() => setActiveStep(stepNum)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setActiveStep(stepNum);
-                  }
-                }}
-                className={`flex items-center gap-3 p-2 rounded-xl transition-all duration-300 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brand-primary select-none ${
-                  activeStep === stepNum
-                    ? "bg-white border border-brand-primary/20 shadow-xs"
-                    : "hover:bg-white/60"
-                }`}
-              >
+              return (
                 <div
-                  className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 transition-colors ${
-                    isActive
-                      ? "bg-brand-primary text-white shadow-xs"
-                      : "bg-white border border-gray-200 text-gray-400"
+                  key={role}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all duration-300 select-none flex items-center gap-1.5 shadow-3xs ${
+                    isMatch
+                      ? "bg-brand-primary text-white shadow-xs shadow-brand-primary/20 scale-[1.02] ring-1 ring-brand-primary/30"
+                      : "bg-white border border-gray-200 text-gray-700"
                   }`}
                 >
-                  {s.step}
+                  {isMatch && <Sparkles className="w-3 h-3 text-white" />}
+                  <span>{role}</span>
+                  {isMatch && (
+                    <span className="text-[9px] px-1 py-0.2 bg-white/20 rounded font-black">
+                      {current.matchScore}%
+                    </span>
+                  )}
                 </div>
-                <div className="min-w-0">
+              );
+            })}
+          </div>
+        </div>
+
+        {/* CARD 3: Roadmap Belajar */}
+        <div className="p-4 sm:p-4.5 bg-gray-50/90 border border-gray-200/90 rounded-2xl sm:rounded-3xl flex flex-col justify-between hover:border-brand-primary/40 transition-all duration-300 relative group flex-1 shadow-xs">
+          <div>
+            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-800 border border-gray-200 mb-1.5">
+              <GraduationCap className="w-4 h-4 text-gray-900" />
+            </div>
+            <h3 className="text-base font-black tracking-tight text-gray-900 leading-tight">
+              Roadmap Belajar
+            </h3>
+            <p className="text-[11px] text-gray-500 leading-tight mt-0.5">
+              Tahapan kurikulum progresif menuju kesiapan kerja.
+            </p>
+          </div>
+
+          {/* Stepper with Live Active Highlight */}
+          <div className="space-y-1.5 pt-2.5">
+            {ROADMAP_STEPS.map((s, idx) => {
+              const stepNum = idx + 1;
+              const isActive = current.activeStep >= stepNum;
+
+              return (
+                <div
+                  key={s.step}
+                  className={`flex items-center gap-2.5 p-1.5 px-2 rounded-lg transition-all duration-300 ${
+                    current.activeStep === stepNum
+                      ? "bg-white border border-brand-primary/30 shadow-3xs"
+                      : "bg-transparent opacity-75"
+                  }`}
+                >
                   <div
-                    className={`text-xs font-bold transition-colors ${
-                      isActive ? "text-gray-900" : "text-gray-500"
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 transition-colors ${
+                      isActive
+                        ? "bg-brand-primary text-white shadow-3xs"
+                        : "bg-white border border-gray-200 text-gray-400"
                     }`}
                   >
-                    {s.title}
+                    {s.step}
                   </div>
-                  <div className="text-[10px] text-gray-400 truncate">
-                    {s.sub}
+                  <div className="min-w-0">
+                    <div
+                      className={`text-xs font-bold leading-tight ${
+                        isActive ? "text-gray-900" : "text-gray-500"
+                      }`}
+                    >
+                      {s.title}
+                    </div>
+                    <div className="text-[10px] text-gray-400 truncate leading-tight">
+                      {s.sub}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* =========================================================================
-          VIRTUAL ECOSYSTEM TOUR CURSOR (Only on desktop & when not user-hovered)
-      ========================================================================= */}
-      {!prefersReducedMotion && !isUserHovered && (
-        <div
-          className="hidden md:block absolute pointer-events-none z-30 transition-all duration-800 ease-[cubic-bezier(0.25,1,0.5,1)]"
-          style={{
-            transform: `translate3d(${cursorPos.x - 3}px, ${cursorPos.y - 2}px, 0)`,
-          }}
-          aria-hidden="true"
-        >
-          {/* SVG Brand Cursor */}
-          <svg
-            width="22"
-            height="26"
-            viewBox="0 0 24 28"
-            fill="none"
-            className="drop-shadow-md"
-          >
-            <path
-              d="M2.5 1.5L21.5 13.5L12 16L8 25.5L2.5 1.5Z"
-              fill="#0066FF"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
-          </svg>
-
-          {/* Click Ripple Effect */}
-          {isClicking && (
-            <span className="absolute -top-3.5 -left-3.5 w-9 h-9 rounded-full bg-brand-primary/30 border-2 border-brand-primary animate-ping pointer-events-none" />
-          )}
-        </div>
-      )}
+      {/* Inline styles for the progress fill keyframe */}
+      <style jsx>{`
+        @keyframes progressFill {
+          from {
+            width: 0%;
+          }
+          to {
+            width: 100%;
+          }
+        }
+      `}</style>
     </div>
   );
 }
