@@ -4,7 +4,7 @@ import { Brain, CheckCircle2, Sparkles, ChevronRight, Compass } from "lucide-rea
 export default function HeroDemoStatic() {
   return (
     <div 
-      className="w-full max-w-[440px] xl:max-w-[480px] h-[500px] mx-auto rounded-[32px] bg-white border border-gray-100 shadow-2xl shadow-gray-200/50 p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden select-none [contain:layout]"
+      className="w-full max-w-[440px] xl:max-w-[480px] h-[620px] mx-auto rounded-[32px] bg-white border border-gray-100 shadow-2xl shadow-gray-200/50 p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden select-none [contain:layout]"
       aria-label="Contoh simulasi asesmen minat karier"
     >
       {/* Decorative Brand Gradient Accent */}
@@ -83,7 +83,7 @@ export default function HeroDemoStatic() {
       </div>
 
       {/* Bottom Assistant Snapshot Preview */}
-      <div className="mt-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between gap-4 relative z-10 shrink-0">
+      <div className="mt-6 p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between gap-4 relative z-10 shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-7 h-7 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0">
             <Sparkles className="w-3.5 h-3.5" />

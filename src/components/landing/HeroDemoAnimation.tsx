@@ -63,12 +63,12 @@ export default function HeroDemoAnimation() {
   }, []);
 
   // Calculate coordinates relative to containerRef, directing SVG hotspot (2.5px, 1.5px) precisely to center
-  const getCoordinates = useCallback((element: HTMLElement | null) => {
+  const getCoordinates = useCallback((element: HTMLElement | null, offset?: { x?: number; y?: number }) => {
     if (!element || !containerRef.current) return { x: 90, y: 70 };
     const cRect = containerRef.current.getBoundingClientRect();
     const eRect = element.getBoundingClientRect();
-    const centerX = eRect.left - cRect.left + eRect.width / 2;
-    const centerY = eRect.top - cRect.top + eRect.height / 2;
+    const centerX = eRect.left - cRect.left + eRect.width / 2 + (offset?.x ?? 0);
+    const centerY = eRect.top - cRect.top + eRect.height / 2 + (offset?.y ?? 0);
     return {
       x: centerX - 2.5,
       y: centerY - 1.5,
@@ -133,7 +133,7 @@ export default function HeroDemoAnimation() {
       // 4.2s: Move cursor to "Lihat Hasil"
       schedule(() => {
         if (nextBtnRef.current) {
-          setCursorPos(getCoordinates(nextBtnRef.current));
+          setCursorPos(getCoordinates(nextBtnRef.current, { y: -3 }));
         }
       }, 4200);
 
@@ -188,7 +188,7 @@ export default function HeroDemoAnimation() {
       } else if (stage === 3 && optBRef.current) {
         setCursorPos(getCoordinates(optBRef.current));
       } else if (stage === 4 && nextBtnRef.current) {
-        setCursorPos(getCoordinates(nextBtnRef.current));
+        setCursorPos(getCoordinates(nextBtnRef.current, { y: -3 }));
       } else if (stage === 5 && chipRef.current) {
         setCursorPos(getCoordinates(chipRef.current));
       }
@@ -200,7 +200,7 @@ export default function HeroDemoAnimation() {
   return (
     <div
       ref={containerRef}
-      className={`w-full max-w-[440px] xl:max-w-[480px] h-[500px] mx-auto rounded-[32px] bg-white border border-gray-100 shadow-2xl shadow-gray-200/50 p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden select-none [contain:layout] transition-opacity duration-500 ${
+      className={`w-full max-w-[440px] xl:max-w-[480px] h-[620px] mx-auto rounded-[32px] bg-white border border-gray-100 shadow-2xl shadow-gray-200/50 p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden select-none [contain:layout] transition-opacity duration-500 ${
         stage === 6 ? "opacity-30" : "opacity-100"
       }`}
       aria-hidden="true"
@@ -227,7 +227,7 @@ export default function HeroDemoAnimation() {
       </div>
 
       {/* Middle Visual Area: Grid-area 1 / 1 Stacking Container */}
-      <div className="grid grid-cols-1 grid-rows-1 my-auto relative z-10 w-full overflow-hidden">
+      <div className="grid grid-cols-1 grid-rows-1 my-auto relative z-10 w-full">
         {/* LAYER 1 (Stage 0, 1, 2, 3): Interactive Question Form */}
         <div
           className={`col-start-1 row-start-1 [grid-area:1/1] w-full flex flex-col justify-center space-y-3.5 transition-all duration-400 ease-out ${
@@ -354,7 +354,7 @@ export default function HeroDemoAnimation() {
           </div>
 
           {/* Action Trigger Button */}
-          <div className="pt-2 flex justify-end relative z-20">
+          <div className="pt-3 flex justify-end relative z-20">
             <button
               ref={nextBtnRef}
               type="button"
@@ -485,7 +485,7 @@ export default function HeroDemoAnimation() {
       </div>
 
       {/* Bottom Assistant Snapshot Preview */}
-      <div className="mt-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between gap-4 relative z-10 shrink-0">
+      <div className="mt-6 p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between gap-4 relative z-10 shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-7 h-7 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0">
             <Sparkles className="w-3.5 h-3.5" />
