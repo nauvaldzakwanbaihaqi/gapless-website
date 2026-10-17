@@ -239,7 +239,20 @@ export default function BentoEcosystemTour() {
               <div
                 key={arch.name}
                 ref={isTarget ? archBuilderRef : undefined}
-                className={`p-4 rounded-2xl border transition-all duration-400 select-none ${
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  setSelectedArchetype(arch.name);
+                  setBarsAnimated(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelectedArchetype(arch.name);
+                    setBarsAnimated(true);
+                  }
+                }}
+                className={`p-4 rounded-2xl border transition-all duration-400 select-none cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${
                   isSelected
                     ? "bg-white border-2 border-brand-primary shadow-md shadow-brand-primary/10 ring-2 ring-brand-primary/10 scale-[1.02]"
                     : "bg-white/80 border-gray-200/80 hover:border-gray-300"
@@ -320,7 +333,18 @@ export default function BentoEcosystemTour() {
               <div
                 key={role}
                 ref={isTarget ? chipSoftwareEngRef : undefined}
-                className={`relative px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 shadow-2xs select-none ${
+                role="button"
+                tabIndex={0}
+                onMouseEnter={() => setHoveredChip(role)}
+                onMouseLeave={() => setHoveredChip(null)}
+                onClick={() => setHoveredChip(hoveredChip === role ? null : role)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setHoveredChip(hoveredChip === role ? null : role);
+                  }
+                }}
+                className={`relative px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-300 shadow-2xs select-none cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${
                   isHovered
                     ? "bg-brand-primary text-white scale-105 shadow-md shadow-brand-primary/20"
                     : "bg-white border border-gray-200/80 text-gray-800 hover:border-brand-primary"
@@ -331,7 +355,7 @@ export default function BentoEcosystemTour() {
                 {/* Floating Interactive Tooltip */}
                 {isHovered && (
                   <div className="absolute -top-11 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-xl bg-gray-900 text-white text-[10px] font-bold tracking-wide whitespace-nowrap shadow-xl z-20 animate-in fade-in zoom-in-95 duration-200">
-                    Kecocokan 95% • Profil The Builder
+                    Kecocokan 95% • Profil {selectedArchetype}
                     <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
                   </div>
                 )}
@@ -368,10 +392,19 @@ export default function BentoEcosystemTour() {
               <div
                 key={s.step}
                 ref={isTarget ? step02Ref : undefined}
-                className={`flex items-center gap-3 p-2 rounded-xl transition-all duration-300 ${
+                role="button"
+                tabIndex={0}
+                onClick={() => setActiveStep(stepNum)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setActiveStep(stepNum);
+                  }
+                }}
+                className={`flex items-center gap-3 p-2 rounded-xl transition-all duration-300 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brand-primary select-none ${
                   activeStep === stepNum
                     ? "bg-white border border-brand-primary/20 shadow-xs"
-                    : ""
+                    : "hover:bg-white/60"
                 }`}
               >
                 <div
