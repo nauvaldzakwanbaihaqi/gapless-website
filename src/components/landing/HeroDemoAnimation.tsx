@@ -190,7 +190,7 @@ export default function HeroDemoAnimation() {
   return (
     <div
       ref={containerRef}
-      className={`w-full max-w-[440px] xl:max-w-[480px] min-h-[460px] md:min-h-[500px] xl:min-h-[520px] mx-auto rounded-[32px] bg-white border border-gray-100 shadow-2xl shadow-gray-200/50 p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden select-none transition-opacity duration-500 ${
+      className={`w-full max-w-[440px] xl:max-w-[480px] h-[500px] mx-auto rounded-[32px] bg-white border border-gray-100 shadow-2xl shadow-gray-200/50 p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden select-none [contain:layout] transition-opacity duration-500 ${
         stage === 6 ? "opacity-30" : "opacity-100"
       }`}
       aria-hidden="true"
@@ -199,7 +199,7 @@ export default function HeroDemoAnimation() {
       <div className="absolute top-0 right-0 w-44 h-44 bg-brand-primary/5 blur-2xl rounded-full pointer-events-none" />
 
       {/* Top Meta Bar */}
-      <div className="flex items-center justify-between border-b border-gray-100 pb-3 relative z-10">
+      <div className="flex items-center justify-between border-b border-gray-100 pb-3 relative z-10 shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary">
             <Brain className="w-4 h-4" />
@@ -216,9 +216,16 @@ export default function HeroDemoAnimation() {
         </span>
       </div>
 
-      {/* STAGE 0, 1, 2, 3: Interactive Question Form */}
-      {stage <= 3 && (
-        <div className="space-y-4 my-auto relative z-10">
+      {/* Middle Visual Area: Grid-area 1 / 1 Stacking Container */}
+      <div className="grid grid-cols-1 grid-rows-1 my-auto relative z-10 w-full overflow-hidden">
+        {/* LAYER 1 (Stage 0, 1, 2, 3): Interactive Question Form */}
+        <div
+          className={`col-start-1 row-start-1 [grid-area:1/1] w-full flex flex-col justify-center space-y-3.5 transition-all duration-400 ease-out ${
+            stage <= 3
+              ? "opacity-100 translate-y-0 pointer-events-auto"
+              : "opacity-0 -translate-y-2 pointer-events-none"
+          }`}
+        >
           {/* Progress Bar */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-[11px] font-semibold text-gray-400">
@@ -352,15 +359,19 @@ export default function HeroDemoAnimation() {
             </button>
           </div>
         </div>
-      )}
 
-      {/* STAGE 4: AI Analysis & Archetype Bars Filling */}
-      {stage === 4 && (
-        <div className="my-auto py-6 space-y-6 text-center relative z-10 animate-in fade-in duration-400">
-          <div className="relative w-16 h-16 mx-auto">
+        {/* LAYER 2 (Stage 4): AI Analysis & Archetype Bars Filling */}
+        <div
+          className={`col-start-1 row-start-1 [grid-area:1/1] w-full flex flex-col justify-center space-y-4 text-center transition-all duration-400 ease-out ${
+            stage === 4
+              ? "opacity-100 scale-100 pointer-events-auto"
+              : "opacity-0 scale-95 pointer-events-none"
+          }`}
+        >
+          <div className="relative w-14 h-14 mx-auto">
             <div className="absolute inset-0 rounded-2xl bg-brand-primary/20 animate-ping opacity-50" />
-            <div className="relative w-16 h-16 rounded-2xl bg-brand-primary text-white flex items-center justify-center shadow-lg">
-              <Brain className="w-8 h-8 animate-pulse" />
+            <div className="relative w-14 h-14 rounded-2xl bg-brand-primary text-white flex items-center justify-center shadow-lg">
+              <Brain className="w-7 h-7 animate-pulse" />
             </div>
           </div>
 
@@ -374,12 +385,12 @@ export default function HeroDemoAnimation() {
           </div>
 
           {/* Sequential Archetype Progress Bars */}
-          <div className="space-y-3 p-4 rounded-2xl bg-gray-50 border border-gray-100 text-left max-w-sm mx-auto">
+          <div className="space-y-2.5 p-3.5 rounded-2xl bg-gray-50 border border-gray-100 text-left max-w-sm mx-auto w-full">
             {[
-              { label: "The Thinker", val: 85, delay: "delay-100" },
-              { label: "The Creator", val: 70, delay: "delay-300" },
-              { label: "The Connector", val: 90, delay: "delay-500" },
-              { label: "The Builder", val: 95, delay: "delay-700" },
+              { label: "The Thinker", val: 85 },
+              { label: "The Creator", val: 70 },
+              { label: "The Connector", val: 90 },
+              { label: "The Builder", val: 95 },
             ].map((bar) => (
               <div key={bar.label} className="space-y-1">
                 <div className="flex justify-between text-[10px] font-bold text-gray-600">
@@ -388,20 +399,24 @@ export default function HeroDemoAnimation() {
                 </div>
                 <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-brand-primary rounded-full animate-in slide-in-from-left duration-700 ease-out"
-                    style={{ width: `${bar.val}%` }}
+                    className="h-full bg-brand-primary rounded-full transition-all duration-700 ease-out"
+                    style={{ width: stage >= 4 ? `${bar.val}%` : "0%" }}
                   />
                 </div>
               </div>
             ))}
           </div>
         </div>
-      )}
 
-      {/* STAGE 5: Result Reveal ("The Builder" + Real Roles + Assistant Bubble) */}
-      {stage === 5 && (
-        <div className="my-auto space-y-4 py-2 relative z-10 animate-in zoom-in-95 fade-in duration-500">
-          <div className="p-5 rounded-2xl bg-brand-primary/5 border border-brand-primary/20 space-y-3">
+        {/* LAYER 3 (Stage 5): Result Reveal ("The Builder" + Real Roles + Assistant Bubble) */}
+        <div
+          className={`col-start-1 row-start-1 [grid-area:1/1] w-full flex flex-col justify-center space-y-3 transition-all duration-400 ease-out ${
+            stage === 5
+              ? "opacity-100 translate-y-0 pointer-events-auto"
+              : "opacity-0 translate-y-2 pointer-events-none"
+          }`}
+        >
+          <div className="p-4 rounded-2xl bg-brand-primary/5 border border-brand-primary/20 space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-black uppercase tracking-widest text-brand-primary">
                 Profil Teridentifikasi
@@ -412,7 +427,7 @@ export default function HeroDemoAnimation() {
             </div>
 
             <div className="space-y-1">
-              <h4 className="text-2xl font-black tracking-tight text-gray-900">
+              <h4 className="text-xl sm:text-2xl font-black tracking-tight text-gray-900">
                 Kamu adalah <span className="text-brand-primary">The Builder</span>
               </h4>
               <p className="text-xs text-gray-600 leading-relaxed">
@@ -421,11 +436,11 @@ export default function HeroDemoAnimation() {
             </div>
 
             {/* Career Chips */}
-            <div className="pt-2">
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+            <div className="pt-1">
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
                 Rekomendasi Karier Teratas:
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 <div
                   ref={chipRef}
                   className="px-3 py-1.5 rounded-xl bg-brand-primary text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-transform scale-105"
@@ -443,7 +458,7 @@ export default function HeroDemoAnimation() {
           </div>
 
           {/* Assistant Bubble Notification */}
-          <div className="p-3.5 rounded-2xl bg-white border border-gray-200/80 shadow-xs flex items-center gap-3 animate-in slide-in-from-bottom-2 duration-400">
+          <div className="p-3 rounded-2xl bg-white border border-gray-200/80 shadow-xs flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0">
               <Sparkles className="w-4 h-4" />
             </div>
@@ -455,7 +470,7 @@ export default function HeroDemoAnimation() {
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Bottom Assistant Snapshot Preview */}
       <div className="p-3.5 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between gap-4 relative z-10">

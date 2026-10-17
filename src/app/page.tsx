@@ -76,9 +76,9 @@ export default function HomePage() {
       {/* Shared Navigation Component */}
       <Navbar />
 
-      {/* Hero Section — Compact, viewport-friendly layout */}
-      <header className="w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-6 pb-12 md:pt-10 md:pb-16 lg:pt-12 lg:pb-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-        <div className="lg:col-span-7 space-y-6 md:space-y-8 text-left">
+      {/* Hero Section — Compact, viewport-friendly layout with top alignment */}
+      <header className="w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 pt-6 pb-12 md:pt-10 md:pb-16 lg:pt-12 lg:pb-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        <div className="lg:col-span-7 space-y-6 md:space-y-8 text-left self-start">
           {/* Status Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-primary/5 border border-brand-primary/15 text-brand-primary text-xs font-bold tracking-wide uppercase self-start">
             <span className="relative flex h-2 w-2">
@@ -130,7 +130,7 @@ export default function HomePage() {
         </div>
 
         {/* Hero Visual Container — Phase 2 Dynamic Animation with Static SSR Fallback */}
-        <div className="lg:col-span-5 w-full flex justify-center lg:justify-end">
+        <div className="lg:col-span-5 w-full flex justify-center lg:justify-end self-start">
           <HeroDemoWrapper />
         </div>
       </header>
